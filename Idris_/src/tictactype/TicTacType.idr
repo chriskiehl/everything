@@ -2,42 +2,43 @@ module TicTacType
 
 
 import Data.Fin
+import Data.Vect
 
 data Piece = X | O
 
-data Vector : Nat -> Type -> Type where
-  Nil : Vector Z a
-  (::) : a -> Vector n a -> Vector (S n) a
-
-
-
 data Lens s a = L (s -> a) (a -> s -> s)
 
-get : Lens s a -> s -> a
-get (L g _) = g
+data Composition : (b -> c) -> (a -> b) -> a -> Type where
+  Comp : (f . g) x -> (Composition f g) x
 
-set : Lens s a -> a -> s -> s
-set (L _ s) = s
+-- accessors for the components of the lens data type
+-- could just as well be a tuple with fst & scd
+getter : Lens s a -> s -> a
+getter (L getter _) = getter
+
+setter : Lens s a -> a -> s -> s
+setter (L _ setter) = setter
 
 
 
-vectorL : Fin n -> Lens (Vector n a) a
+
+vectorL : Fin n -> Lens (Vect n a) a
 vectorL index = L (get index) (set index) where
-  get : Fin n -> Vector n a -> a
+  get : Fin n -> Vect n a -> a
   get FZ (v :: vs) = v
   get (FS m) (v :: vs) = get m vs
 
-  set : Fin n -> a -> Vector n a -> Vector n a
+  set : Fin n -> a -> Vect n a -> Vect n a
   set FZ a (_ :: vs) = a :: vs
   set (FS m) a (v :: vs) = v :: (set m a vs)
 
 
-tail : Vector (S n) a -> Vector n a
+tail : Vect (S n) a -> Vect n a
 tail (x :: xs) = xs
 
 
 ticTacTerrific : Type
-ticTacTerrific = Vector 3 (Vector 3 (Maybe Piece))
+ticTacTerrific = Vect 3 (Vect 3 (Maybe Piece))
 
 
 main : IO ()
